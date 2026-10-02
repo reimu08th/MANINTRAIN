@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>降ります!! 満員電車サバイバル</title>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1efe6;--ink:#1d2a22;--sub:#5b6b60;--line:#80c241;--floor:#d8dccb;--cell:#c9cfb9;--door:#f2c230;--card:#fff;--bad:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17201b;--ink:#eef2e6;--sub:#9fb0a2;--floor:#2a362e;--cell:#334237;--card:#212d25}}
+:root[data-theme="dark"]{--bg:#17201b;--ink:#eef2e6;--sub:#9fb0a2;--floor:#2a362e;--cell:#334237;--card:#212d25}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",sans-serif;font-weight:500;display:flex;justify-content:center;touch-action:manipulation}
+#app{width:min(100%,420px);padding:10px 14px 18px;position:relative}
+.top{border-left:10px solid var(--line);padding-left:10px;display:flex;justify-content:space-between;align-items:flex-end}
+h1{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-weight:400;font-size:22px;margin:0;line-height:1.2}
+.st{font-size:13px;color:var(--sub)}
+.stn{font-family:"Dela Gothic One",sans-serif;font-size:20px}
+.bars{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;margin:10px 0;font-size:12px}
+.bar{height:10px;border-radius:5px;background:var(--cell);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--line);transition:width .1s linear}
+#meiwaku i{background:var(--bad);width:0}
+#board{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;background:var(--floor);padding:6px;border-radius:10px;border:3px solid var(--ink);touch-action:none;user-select:none}
+#board.shake{animation:sh .35s}
+@keyframes sh{20%{transform:translateX(-7px) rotate(-.6deg)}50%{transform:translateX(7px) rotate(.6deg)}80%{transform:translateX(-3px)}}
+.c{aspect-ratio:1;border-radius:6px;background:var(--cell);display:flex;align-items:center;justify-content:center;font-size:min(8.2vw,32px);line-height:1}
+.c.w{background:transparent}
+.c.d{background:var(--door);color:#5a4300;font-size:11px;font-weight:700}
+.c.me{background:var(--line);box-shadow:0 0 0 2px var(--ink) inset}
+.c.mad{background:#f5c3c4}
+#toast{min-height:24px;text-align:center;font-weight:700;margin:8px 0 2px}
+.pad{display:grid;grid-template-columns:repeat(3,76px);grid-template-rows:repeat(2,60px);gap:6px;justify-content:center;margin-top:6px}
+.pad button{border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:12px;font-size:24px;font-family:inherit;cursor:pointer}
+.pad button:active{background:var(--line)}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .dn{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+#ov{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 92%,transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;z-index:5}
+#ov h2{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:30px;margin:0;line-height:1.25}
+#ov p{margin:0;color:var(--sub);line-height:1.7;font-size:14px}
+#go{font-family:"Dela Gothic One",sans-serif;font-size:20px;padding:12px 30px;border:3px solid var(--ink);background:var(--door);color:#1d2a22;border-radius:40px;cursor:pointer;margin-top:6px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><div><h1>降ります!!</h1><div class="st">満員電車サバイバル</div></div><div style="text-align:right"><div class="st">次の駅</div><div class="stn" id="stn">新宿</div></div></div>
+  <div class="bars"><span>ドア閉まる</span><div class="bar" id="time"><i></i></div><span>迷惑度</span><div class="bar" id="meiwaku"><i></i></div></div>
+  <div id="board"></div>
+  <div id="toast"> </div>
+  <div class="pad"><button class="u" data-d="0,-1">▲</button><button class="l" data-d="-1,0">◀</button><button class="dn" data-d="0,1">▼</button><button class="r" data-d="1,0">▶</button></div>
+  <div id="ov"><h2 id="ovt">降ります!!<br>満員電車</h2><p id="ovp">あなた🧑‍💼は降りたい。でも車内はぎゅうぎゅう。<br>押して進めば無料、すみません交換は迷惑度アップ。<br>ガタンゴトンの揺れにも注意。<br>黄色いドアまで辿り着け！<br>（矢印キー / スワイプ / ボタン）</p><p id="best"></p><button id="go">乗車する</button></div>
+</div>
+<script>
+const W=7,H=9,DOOR=[2,3,4],ST=["新宿","渋谷","池袋","東京","品川","上野","秋葉原","新橋","大崎","目黒","高田馬場","五反田"];
+const PX=["👨‍💼","👩‍💼","🧓","👵","🧑‍🎓","🧔","👷","🥷","🐧","🧑‍🍳","🤖","🎒"];
+const FAIL=["すみません!","ちょっと失礼!","あっ、足が…","降ります降ります!","チッ…"];
+const $=s=>document.querySelector(s);
+let g,me,lvl,tl,tmax,mw,sway,run=false,best=0,lastT=0,mad=null;
+try{best=+localStorage.getItem("mamiden")||0}catch(e){}
+const board=$("#board");
+function wall(x,y){return y===H-1&&!DOOR.includes(x)}
+function inb(x,y){return x>=0&&x<W&&y>=0&&y<H&&!wall(x,y)}
+function free(x,y){return inb(x,y)&&!g[y][x]&&!(me.x===x&&me.y===y)}
+function start(){lvl=0;mw=0;$("#ov").classList.add("hide");run=true;newStation()}
+function newStation(){
+  g=Array.from({length:H},()=>Array(W).fill(null));
+  me={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*2)};
+  const d=Math.min(.7,.45+lvl*.03);
+  for(let y=0;y<H-1;y++)for(let x=0;x<W;x++)if(!(x===me.x&&y===me.y)&&Math.random()<d)g[y][x]=PX[Math.random()*PX.length|0];
+  tmax=tl=Math.max(9,16-lvl*.6);sway=3.5;
+  $("#stn").textContent=ST[lvl%ST.length]+(lvl>=ST.length?"（"+(Math.floor(lvl/ST.length)+1)+"周目）":"");
+  toast(lvl?"ドアが開く！次も降りるぞ":"ドアはいちばん下の黄色");render();
+}
+function render(){
+  let h="";
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    let c="c",t="";
+    if(wall(x,y))c+=" w";
+    else if(y===H-1){c+=" d";t="ドア"}
+    if(g[y][x]){t=g[y][x];if(mad&&mad.x===x&&mad.y===y){c+=" mad";t="😠"}}
+    if(me.x===x&&me.y===y){c+=" me";t="🧑‍💼"}
+    h+=`<div class="${c}">${t}</div>`;
+  }
+  board.innerHTML=h;
+  $("#time i").style.width=Math.max(0,tl/tmax*100)+"%";
+  $("#meiwaku i").style.width=Math.min(100,mw)+"%";
+}
+function toast(s){$("#toast").textContent=s}
+function move(dx,dy){
+  if(!run)return;
+  const nx=me.x+dx,ny=me.y+dy;mad=null;
+  if(!inb(nx,ny))return;
+  if(!g[ny][nx]){me.x=nx;me.y=ny}
+  else{
+    const tx=nx+dx,ty=ny+dy;
+    if(free(tx,ty)){g[ty][tx]=g[ny][nx];g[ny][nx]=null;me.x=nx;me.y=ny;toast("ぐいぐい押す")}
+    else{
+      g[me.y][me.x]=g[ny][nx];g[ny][nx]=null;mad={x:me.x,y:me.y};
+      me.x=nx;me.y=ny;mw+=12;tl-=.5;toast(FAIL[Math.random()*FAIL.length|0]+" 迷惑度+12");
+      if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}
+    }
+  }
+  if(me.y===H-1){lvl++;toast("降車成功！");run=false;render();setTimeout(()=>{run=true;newStation()},700);return}
+  if(mw>=100)return over("舌打ちの嵐…","車内の空気に耐えきれず、全員から白い目で見られた。");
+  render();
+}
+function doSway(){
+  board.classList.remove("shake");void board.offsetWidth;board.classList.add("shake");
+  toast("ガタンゴトン！！");
+  const D=[[1,0],[-1,0],[0,1],[0,-1]],list=[];
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x])list.push([x,y]);
+  list.sort(()=>Math.random()-.5);
+  for(const[x,y]of list){const[a,b]=D[Math.random()*4|0];if(free(x+a,y+b)){g[y+b][x+a]=g[y][x];g[y][x]=null}}
+  if(Math.random()<.6){const[a,b]=D[Math.random()*4|0];if(free(me.x+a,me.y+b)&&me.y+b<H-1){me.x+=a;me.y+=b}}
+  render();
+}
+function over(t,p){
+  run=false;render();
+  if(lvl>best){best=lvl;try{localStorage.setItem("mamiden",best)}catch(e){}}
+  $("#ovt").innerHTML=t;
+  $("#ovp").innerHTML=p+"<br><b style=\"color:var(--ink);font-size:18px\">"+lvl+"駅 降りられた</b>";
+  $("#best").textContent="ベスト："+best+"駅";$("#go").textContent="もう一回乗る";
+  $("#ov").classList.remove("hide");
+}
+setInterval(()=>{
+  if(!run)return;
+  tl-=.1;sway-=.1;mw=Math.max(0,mw-.25);
+  if(sway<=0){sway=Math.max(2.2,4-lvl*.1);doSway()}
+  if(tl<=0){return over("乗り過ごした…","ドアが閉まって発車。<br>次の駅で反対ホームへ走るしかない。")}
+  $("#time i").style.width=Math.max(0,tl/tmax*100)+"%";
+  $("#meiwaku i").style.width=Math.min(100,mw)+"%";
+},100);
+$("#go").onclick=start;
+document.querySelectorAll(".pad button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();const[a,c]=b.dataset.d.split(",").map(Number);move(a,c)}));
+addEventListener("keydown",e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();move(...m)}});
+let sx,sy;
+board.addEventListener("pointerdown",e=>{sx=e.clientX;sy=e.clientY});
+board.addEventListener("pointerup",e=>{if(sx==null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+  Math.abs(dx)>Math.abs(dy)?move(dx>0?1:-1,0):move(0,dy>0?1:-1)});
+$("#best").textContent=best?"ベスト："+best+"駅":"";
+render0();function render0(){g=Array.from({length:H},()=>Array(W).fill(null));me={x:3,y:0};tl=tmax=10;render()}
+</script>
+</body>
+</html>
